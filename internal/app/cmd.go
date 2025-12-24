@@ -359,8 +359,8 @@ func RunWithConfig(opts *Options, config *ViperConfig) error {
 			// Generate infographics from research results
 			imagePrompt = imageClient.BuildInfographicsPrompt(researchResult.Content)
 		} else {
-			// Use prompt directly in ImageOnly mode
-			imagePrompt = prompt
+			// Use prompt template in ImageOnly mode
+			imagePrompt = imageClient.BuildInfographicsPrompt(prompt)
 		}
 
 		// Image generation configuration

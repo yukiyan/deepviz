@@ -63,8 +63,7 @@ func sanitizeImagePrompt(prompt string) string {
 //
 // Template:
 //
-//	Please thoroughly understand the following content and create an infographic in a single image.
-//	Please respond in {ImageLang}.
+//	Take a good look at the content below and turn it into a single infographic image in {ImageLang}.
 //	```
 //	{markdown}
 //	```
@@ -72,8 +71,7 @@ func (c *GenaiImageClient) BuildInfographicsPrompt(markdown string) string {
 	// Sanitize markdown content
 	sanitizedMarkdown := sanitizeImagePrompt(markdown)
 
-	promptTemplate := `Please thoroughly understand the following content and create an infographic in a single image.
-Please respond in %s.
+	promptTemplate := `Take a good look at the content below and turn it into a single infographic image in %s.
 ` + "```" + `
 %s
 ` + "```"
