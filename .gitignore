@@ -1,0 +1,6 @@
+.mise.toml
+.claude
+/bin/*
+/build/*
+/dist/*
+!.gitkeep

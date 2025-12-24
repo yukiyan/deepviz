@@ -1,0 +1,8 @@
+package: interactions
+output: internal/genai/interactions/client.gen.go
+generate:
+  models: true
+  client: true
+  embedded-spec: true
+output-options:
+  skip-prune: false
