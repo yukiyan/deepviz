@@ -162,19 +162,9 @@ func (c *ViperConfig) ResponsesDir() string {
 	return filepath.Join(c.OutputDir, "responses")
 }
 
-// LogDir returns the log directory (XDG_STATE_HOME compliant).
-func (c *ViperConfig) LogDir() string {
-	xdgStateHome := os.Getenv("XDG_STATE_HOME")
-	if xdgStateHome == "" {
-		home, err := os.UserHomeDir()
-		if err == nil {
-			xdgStateHome = filepath.Join(home, ".local", "state")
-		} else {
-			// Fallback to /tmp if home directory cannot be determined
-			return filepath.Join("/tmp", "deepviz")
-		}
-	}
-	return filepath.Join(xdgStateHome, "deepviz")
+// LogsDir returns the output directory for logs.
+func (c *ViperConfig) LogsDir() string {
+	return filepath.Join(c.OutputDir, "logs")
 }
 
 // EnsureDirectories ensures all output directories exist.
@@ -183,6 +173,7 @@ func (c *ViperConfig) EnsureDirectories() error {
 		c.ResearchDir(),
 		c.ImagesDir(),
 		c.ResponsesDir(),
+		c.LogsDir(),
 	}
 
 	for _, dir := range dirs {

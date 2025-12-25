@@ -298,23 +298,19 @@ func RunWithConfig(opts *Options, config *ViperConfig) error {
 	// Create context
 	ctx := context.Background()
 
-	// Ensure log directory exists and create log file path
-	logDir := config.LogDir()
-	if err := EnsureDir(logDir); err != nil {
-		return fmt.Errorf("failed to create log directory: %w", err)
-	}
-	logFilePath := filepath.Join(logDir, "deepviz.log")
-
-	// Create logger
-	logger := NewSlogLogger(opts.Verbose, logFilePath)
+	// Generate timestamp
+	timestamp := GenerateTimestamp()
 
 	// Ensure output directories exist
 	if err := config.EnsureDirectories(); err != nil {
 		return fmt.Errorf("failed to ensure directories: %w", err)
 	}
 
-	// Generate timestamp
-	timestamp := GenerateTimestamp()
+	// Create log file path with timestamp
+	logFilePath := filepath.Join(config.LogsDir(), timestamp+".log")
+
+	// Create logger
+	logger := NewSlogLogger(opts.Verbose, logFilePath)
 
 	// Get prompt (from file or direct)
 	prompt := opts.Prompt

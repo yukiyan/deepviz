@@ -232,8 +232,10 @@ Default: `$XDG_DATA_HOME/deepviz` (typically `~/.local/share/deepviz`)
 │   └── 20251224_103045.md              # Research result (Markdown)
 ├── images/
 │   └── 20251224_103045.png             # Generated infographics
-└── responses/
-    └── 20251224_103045_image.json      # Image generation API response (JSON)
+├── responses/
+│   └── 20251224_103045_image.json      # Image generation API response (JSON)
+└── logs/
+    └── 20251224_103045.log              # Execution log (JSON)
 ```
 
 ### File naming
