@@ -28,6 +28,8 @@ type ViperConfig struct {
 	ImageSize string
 	// ImageLang is the language for image generation (e.g., "Japanese", "English", "French")
 	ImageLang string
+	// AutoOpen enables automatic opening of generated images
+	AutoOpen bool
 
 	configDir string
 	v         *viper.Viper
@@ -67,6 +69,7 @@ func NewViperConfig(configDir string) (*ViperConfig, error) {
 	v.SetDefault("aspect_ratio", "16:9")
 	v.SetDefault("image_size", "2K")
 	v.SetDefault("image_lang", "Japanese")
+	v.SetDefault("auto_open", true)
 
 	// Set environment variable prefix
 	v.SetEnvPrefix("GEMINI")
@@ -109,6 +112,7 @@ func NewViperConfig(configDir string) (*ViperConfig, error) {
 		AspectRatio:       v.GetString("aspect_ratio"),
 		ImageSize:         v.GetString("image_size"),
 		ImageLang:         v.GetString("image_lang"),
+		AutoOpen:          v.GetBool("auto_open"),
 		configDir:         configDir,
 		v:                 v,
 	}

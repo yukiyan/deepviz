@@ -158,6 +158,7 @@ model: gemini-3-pro-image-preview
 aspect_ratio: "16:9"
 image_size: 2K
 image_lang: Japanese
+auto_open: true
 ```
 
 ### Configuration priority (highest to lowest)
@@ -186,6 +187,7 @@ image_lang: Japanese
 | `--research-only` | Execute research only (skip image generation) | `false` |
 | `--no-image` | Alias for `--research-only` | `false` |
 | `--image-only` | Execute image generation only (skip research) | `false` |
+| `--no-open` | Disable auto-open after image generation | `false` |
 
 ### Image Generation Options
 
@@ -215,6 +217,7 @@ image_lang: Japanese
 | `GEMINI_ASPECT_RATIO` | Image aspect ratio | `16:9` |
 | `GEMINI_IMAGE_SIZE` | Image resolution | `2K` |
 | `GEMINI_IMAGE_LANG` | Language for image generation | `Japanese` |
+| `GEMINI_AUTO_OPEN` | Auto-open image after generation | `true` |
 
 ### Advanced Configuration
 

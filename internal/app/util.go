@@ -3,7 +3,9 @@ package app
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"time"
 )
 
@@ -35,4 +37,31 @@ func WriteFile(path string, data []byte) error {
 // ReadFile reads data from a file.
 func ReadFile(path string) ([]byte, error) {
 	return os.ReadFile(path)
+}
+
+// OpenFile opens a file with the system's default application.
+//
+// Supports cross-platform file opening:
+// - macOS: open command
+// - Linux: xdg-open command
+// - Windows: cmd /c start command
+func OpenFile(path string) error {
+	var cmd string
+	var args []string
+
+	switch runtime.GOOS {
+	case "darwin":
+		cmd = "open"
+		args = []string{path}
+	case "linux":
+		cmd = "xdg-open"
+		args = []string{path}
+	case "windows":
+		cmd = "cmd"
+		args = []string{"/c", "start", "", path}
+	default:
+		return fmt.Errorf("unsupported platform: %s", runtime.GOOS)
+	}
+
+	return exec.Command(cmd, args...).Start()
 }

@@ -23,6 +23,7 @@ type Options struct {
 	Output       string
 	Verbose      bool
 	Trace        bool
+	NoOpen       bool
 }
 
 // NewRootCommand creates the root command.
@@ -40,6 +41,7 @@ func NewRootCommand() *cobra.Command {
 		model        string
 		aspectRatio  string
 		imageSize    string
+		noOpen       bool
 	)
 
 	rootCmd := &cobra.Command{
@@ -84,6 +86,7 @@ func NewRootCommand() *cobra.Command {
 				Model:        config.Model,
 				AspectRatio:  config.AspectRatio,
 				ImageSize:    config.ImageSize,
+				NoOpen:       noOpen,
 			}
 
 			// Execute Run function (existing logic)
@@ -102,6 +105,7 @@ func NewRootCommand() *cobra.Command {
 	rootCmd.Flags().StringVar(&model, "model", "gemini-3-pro-image-preview", "Image generation model name")
 	rootCmd.Flags().StringVar(&aspectRatio, "aspect-ratio", "16:9", "Aspect ratio")
 	rootCmd.Flags().StringVar(&imageSize, "image-size", "2K", "Image size")
+	rootCmd.Flags().BoolVar(&noOpen, "no-open", false, "Disable auto-open after image generation")
 
 	// --no-image is an alias for --research-only
 	rootCmd.Flags().BoolVar(&researchOnly, "no-image", false, "Skip image generation (same as --research-only)")
@@ -222,6 +226,7 @@ func newConfigCommand() *cobra.Command {
 			config.Set("aspect_ratio", "16:9")
 			config.Set("image_size", "2K")
 			config.Set("image_lang", "Japanese")
+			config.Set("auto_open", true)
 
 			// Save config file
 			if err := config.Save(); err != nil {
@@ -375,6 +380,13 @@ func RunWithConfig(opts *Options, config *ViperConfig) error {
 			return fmt.Errorf("failed to generate image: %w", err)
 		}
 		logger.Info("Image generation completed", "image_path", imageResult.ImagePath)
+
+		// Auto-open image if enabled (flag takes priority, then config)
+		if !opts.NoOpen && config.AutoOpen {
+			if err := OpenFile(imageResult.ImagePath); err != nil {
+				logger.Info("Failed to open image", "error", err)
+			}
+		}
 	}
 
 	// Output results summary
