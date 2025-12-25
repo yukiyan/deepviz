@@ -111,13 +111,31 @@ func NewViperConfig(configDir string) (*ViperConfig, error) {
 		apiKey = v.GetString("api_key")
 	}
 
+	// Priority: DEEPVIZ_MODEL (env) > GEMINI_MODEL (env) > config file
+	model := os.Getenv("DEEPVIZ_MODEL")
+	if model == "" {
+		model = os.Getenv("GEMINI_MODEL")
+	}
+	if model == "" {
+		model = v.GetString("model")
+	}
+
+	// Priority: DEEPVIZ_DEEP_RESEARCH_AGENT (env) > GEMINI_DEEP_RESEARCH_AGENT (env) > config file
+	deepResearchAgent := os.Getenv("DEEPVIZ_DEEP_RESEARCH_AGENT")
+	if deepResearchAgent == "" {
+		deepResearchAgent = os.Getenv("GEMINI_DEEP_RESEARCH_AGENT")
+	}
+	if deepResearchAgent == "" {
+		deepResearchAgent = v.GetString("deep_research_agent")
+	}
+
 	config := &ViperConfig{
 		OutputDir:         v.GetString("output_dir"),
 		APIKey:            apiKey,
-		DeepResearchAgent: v.GetString("deep_research_agent"),
+		DeepResearchAgent: deepResearchAgent,
 		PollInterval:      v.GetInt("poll_interval"),
 		PollTimeout:       v.GetInt("poll_timeout"),
-		Model:             v.GetString("model"),
+		Model:             model,
 		AspectRatio:       v.GetString("aspect_ratio"),
 		ImageSize:         v.GetString("image_size"),
 		ImageLang:         v.GetString("image_lang"),

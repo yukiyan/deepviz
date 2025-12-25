@@ -206,7 +206,7 @@ auto_open: true
 |---------------------|-------------|---------|
 | `GEMINI_API_KEY` or `DEEPVIZ_API_KEY` | Gemini API key (required) | - |
 | `DEEPVIZ_OUTPUT_DIR` | Output directory | `~/.local/share/deepviz` |
-| `DEEPVIZ_MODEL` | Image generation model | `gemini-3-pro-image-preview` |
+| `GEMINI_MODEL` or `DEEPVIZ_MODEL` | Image generation model | `gemini-3-pro-image-preview` |
 | `DEEPVIZ_ASPECT_RATIO` | Image aspect ratio | `16:9` |
 | `DEEPVIZ_IMAGE_SIZE` | Image resolution | `2K` |
 | `DEEPVIZ_IMAGE_LANG` | Language for image generation | `Japanese` |
@@ -216,7 +216,7 @@ auto_open: true
 
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
-| `DEEPVIZ_DEEP_RESEARCH_AGENT` | Deep Research agent name | `deep-research-pro-preview-12-2025` |
+| `GEMINI_DEEP_RESEARCH_AGENT` or `DEEPVIZ_DEEP_RESEARCH_AGENT` | Deep Research agent name | `deep-research-pro-preview-12-2025` |
 | `DEEPVIZ_POLL_INTERVAL` | Polling interval in seconds | `10` |
 | `DEEPVIZ_POLL_TIMEOUT` | Polling timeout in seconds | `600` |
 
