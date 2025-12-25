@@ -129,7 +129,7 @@ func (c *GenaiImageClient) Generate(ctx context.Context, prompt string, imgConfi
 
 	// Execute request
 	c.logger.Info("Generating image", "model", imgConfig.Model, "aspect_ratio", imgConfig.AspectRatio, "size", imgConfig.ImageSize)
-	c.logger.Trace("HTTP Request", "url", url, "method", "POST", "body", string(bodyBytes))
+	c.logger.Debug("HTTP Request", "url", url, "method", "POST", "body", string(bodyBytes))
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to do request: %w", err)
@@ -142,7 +142,7 @@ func (c *GenaiImageClient) Generate(ctx context.Context, prompt string, imgConfi
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	c.logger.Trace("HTTP Response", "url", url, "status_code", resp.StatusCode, "body", string(body))
+	c.logger.Debug("HTTP Response", "url", url, "status_code", resp.StatusCode, "body", string(body))
 
 	// Check status code
 	if resp.StatusCode != http.StatusOK {

@@ -99,7 +99,7 @@ deepviz --file prompt.txt
 ### Generate infographics in English
 
 ```bash
-export GEMINI_IMAGE_LANG="English"
+export DEEPVIZ_IMAGE_LANG="English"
 deepviz --prompt "Docker container best practices"
 ```
 
@@ -113,12 +113,6 @@ deepviz --prompt "System architecture" --aspect-ratio 1:1 --image-size 4K
 
 ```bash
 deepviz --verbose --prompt "Cloud security"
-```
-
-### Trace HTTP requests/responses (for deep debugging)
-
-```bash
-deepviz --trace --prompt "API design patterns"
 ```
 
 ## Configuration Management
@@ -177,8 +171,7 @@ auto_open: true
 | `--prompt` | `-p` | Inline prompt text | - |
 | `--file` | `-f` | Read prompt from file | - |
 | `--output` | `-o` | Output directory | `~/.local/share/deepviz` |
-| `--verbose` | `-v` | Enable verbose logging | `false` |
-| `--trace` | - | Enable trace logging (includes HTTP request/response bodies) | `false` |
+| `--verbose` | `-v` | Enable verbose logging (DEBUG level) | `false` |
 
 ### Workflow Control
 
@@ -211,21 +204,21 @@ auto_open: true
 
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
-| `GEMINI_API_KEY` | Gemini API key (required) | - |
-| `GEMINI_OUTPUT_DIR` | Output directory | `~/.local/share/deepviz` |
-| `GEMINI_MODEL` | Image generation model | `gemini-3-pro-image-preview` |
-| `GEMINI_ASPECT_RATIO` | Image aspect ratio | `16:9` |
-| `GEMINI_IMAGE_SIZE` | Image resolution | `2K` |
-| `GEMINI_IMAGE_LANG` | Language for image generation | `Japanese` |
-| `GEMINI_AUTO_OPEN` | Auto-open image after generation | `true` |
+| `GEMINI_API_KEY` or `DEEPVIZ_API_KEY` | Gemini API key (required) | - |
+| `DEEPVIZ_OUTPUT_DIR` | Output directory | `~/.local/share/deepviz` |
+| `DEEPVIZ_MODEL` | Image generation model | `gemini-3-pro-image-preview` |
+| `DEEPVIZ_ASPECT_RATIO` | Image aspect ratio | `16:9` |
+| `DEEPVIZ_IMAGE_SIZE` | Image resolution | `2K` |
+| `DEEPVIZ_IMAGE_LANG` | Language for image generation | `Japanese` |
+| `DEEPVIZ_AUTO_OPEN` | Auto-open image after generation | `true` |
 
 ### Advanced Configuration
 
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
-| `GEMINI_DEEP_RESEARCH_AGENT` | Deep Research agent name | `deep-research-pro-preview-12-2025` |
-| `GEMINI_POLL_INTERVAL` | Polling interval in seconds | `10` |
-| `GEMINI_POLL_TIMEOUT` | Polling timeout in seconds | `600` |
+| `DEEPVIZ_DEEP_RESEARCH_AGENT` | Deep Research agent name | `deep-research-pro-preview-12-2025` |
+| `DEEPVIZ_POLL_INTERVAL` | Polling interval in seconds | `10` |
+| `DEEPVIZ_POLL_TIMEOUT` | Polling timeout in seconds | `600` |
 
 ## Output
 
@@ -256,7 +249,7 @@ You can customize the output directory:
 deepviz --output ./my-output --prompt "Custom output location"
 
 # Via environment variable
-export GEMINI_OUTPUT_DIR="./my-output"
+export DEEPVIZ_OUTPUT_DIR="./my-output"
 deepviz --prompt "Custom output location"
 ```
 

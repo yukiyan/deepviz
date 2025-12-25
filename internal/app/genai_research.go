@@ -133,7 +133,7 @@ func (c *GenaiResearchClient) startResearch(ctx context.Context, prompt string) 
 	}
 
 	// Trace log request body
-	c.logger.Trace("HTTP Request", "method", "POST", "body", string(bodyJSON))
+	c.logger.Debug("HTTP Request", "method", "POST", "body", string(bodyJSON))
 
 	// Execute request using WithBody variant to avoid union type issues
 	resp, err := c.client.CreateInteractionWithBodyWithResponse(ctx, "v1beta", "application/json", bytes.NewReader(bodyJSON))
@@ -142,7 +142,7 @@ func (c *GenaiResearchClient) startResearch(ctx context.Context, prompt string) 
 	}
 
 	// Trace log response (raw body)
-	c.logger.Trace("HTTP Response", "status_code", resp.StatusCode(), "body", string(resp.Body))
+	c.logger.Debug("HTTP Response", "status_code", resp.StatusCode(), "body", string(resp.Body))
 
 	c.logger.Debug("Response received", "status_code", resp.StatusCode())
 
@@ -221,7 +221,7 @@ func (c *GenaiResearchClient) checkStatus(ctx context.Context, interactionID str
 	}
 
 	// Trace log response (raw body)
-	c.logger.Trace("HTTP Response", "status_code", resp.StatusCode(), "body", string(resp.Body))
+	c.logger.Debug("HTTP Response", "status_code", resp.StatusCode(), "body", string(resp.Body))
 
 	// Check status code
 	if resp.StatusCode() != http.StatusOK {
@@ -272,7 +272,7 @@ func (c *GenaiResearchClient) cancelResearch(interactionID string) error {
 	}
 
 	// Trace log response (raw body)
-	c.logger.Trace("HTTP Response", "status_code", resp.StatusCode(), "body", string(resp.Body))
+	c.logger.Debug("HTTP Response", "status_code", resp.StatusCode(), "body", string(resp.Body))
 
 	if resp.StatusCode() != http.StatusOK {
 		return fmt.Errorf("cancel failed with status %d: %s", resp.StatusCode(), string(resp.Body))

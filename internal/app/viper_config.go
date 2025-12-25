@@ -72,7 +72,7 @@ func NewViperConfig(configDir string) (*ViperConfig, error) {
 	v.SetDefault("auto_open", true)
 
 	// Set environment variable prefix
-	v.SetEnvPrefix("GEMINI")
+	v.SetEnvPrefix("DEEPVIZ")
 	v.AutomaticEnv()
 
 	// Determine config file directory (XDG Base Directory compliant)
@@ -102,9 +102,18 @@ func NewViperConfig(configDir string) (*ViperConfig, error) {
 	}
 
 	// Map configuration to struct
+	// Priority: DEEPVIZ_API_KEY (env) > GEMINI_API_KEY (env) > config file
+	apiKey := os.Getenv("DEEPVIZ_API_KEY")
+	if apiKey == "" {
+		apiKey = os.Getenv("GEMINI_API_KEY")
+	}
+	if apiKey == "" {
+		apiKey = v.GetString("api_key")
+	}
+
 	config := &ViperConfig{
 		OutputDir:         v.GetString("output_dir"),
-		APIKey:            v.GetString("api_key"),
+		APIKey:            apiKey,
 		DeepResearchAgent: v.GetString("deep_research_agent"),
 		PollInterval:      v.GetInt("poll_interval"),
 		PollTimeout:       v.GetInt("poll_timeout"),
@@ -133,6 +142,21 @@ func (c *ViperConfig) ImagesDir() string {
 // ResponsesDir returns the output directory for raw responses.
 func (c *ViperConfig) ResponsesDir() string {
 	return filepath.Join(c.OutputDir, "responses")
+}
+
+// LogDir returns the log directory (XDG_STATE_HOME compliant).
+func (c *ViperConfig) LogDir() string {
+	xdgStateHome := os.Getenv("XDG_STATE_HOME")
+	if xdgStateHome == "" {
+		home, err := os.UserHomeDir()
+		if err == nil {
+			xdgStateHome = filepath.Join(home, ".local", "state")
+		} else {
+			// Fallback to /tmp if home directory cannot be determined
+			return filepath.Join("/tmp", "deepviz")
+		}
+	}
+	return filepath.Join(xdgStateHome, "deepviz")
 }
 
 // EnsureDirectories ensures all output directories exist.

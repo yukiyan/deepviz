@@ -11,8 +11,9 @@ func TestViperConfig_DefaultValues(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	// Clear environment variables
-	os.Unsetenv("GEMINI_OUTPUT_DIR")
+	os.Unsetenv("DEEPVIZ_OUTPUT_DIR")
 	os.Unsetenv("GEMINI_API_KEY")
+	os.Unsetenv("DEEPVIZ_API_KEY")
 
 	config, err := NewViperConfig(tmpDir)
 	if err != nil {
@@ -42,10 +43,10 @@ func TestViperConfig_EnvironmentVariables(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	// Set environment variables
-	os.Setenv("GEMINI_OUTPUT_DIR", "/custom/output")
+	os.Setenv("DEEPVIZ_OUTPUT_DIR", "/custom/output")
 	os.Setenv("GEMINI_API_KEY", "test-api-key")
 	defer func() {
-		os.Unsetenv("GEMINI_OUTPUT_DIR")
+		os.Unsetenv("DEEPVIZ_OUTPUT_DIR")
 		os.Unsetenv("GEMINI_API_KEY")
 	}()
 
@@ -123,10 +124,10 @@ api_key: file-api-key
 	}
 
 	// Set environment variables (env should take precedence)
-	os.Setenv("GEMINI_OUTPUT_DIR", "/env/output")
+	os.Setenv("DEEPVIZ_OUTPUT_DIR", "/env/output")
 	os.Setenv("GEMINI_API_KEY", "env-api-key")
 	defer func() {
-		os.Unsetenv("GEMINI_OUTPUT_DIR")
+		os.Unsetenv("DEEPVIZ_OUTPUT_DIR")
 		os.Unsetenv("GEMINI_API_KEY")
 	}()
 
@@ -150,8 +151,9 @@ func TestViperConfig_Save(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	// Clear environment variables
-	os.Unsetenv("GEMINI_OUTPUT_DIR")
+	os.Unsetenv("DEEPVIZ_OUTPUT_DIR")
 	os.Unsetenv("GEMINI_API_KEY")
+	os.Unsetenv("DEEPVIZ_API_KEY")
 
 	config, err := NewViperConfig(tmpDir)
 	if err != nil {

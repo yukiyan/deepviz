@@ -7,15 +7,11 @@ import (
 	"os"
 )
 
-// LevelTrace is a custom log level for detailed tracing.
-const LevelTrace = slog.Level(-8)
-
 // Logger is an interface for structured logging.
 type Logger interface {
 	Info(msg string, args ...any)
 	Error(msg string, args ...any)
 	Debug(msg string, args ...any)
-	Trace(msg string, args ...any)
 }
 
 // SlogLogger is a logger that uses slog.
@@ -24,21 +20,45 @@ type SlogLogger struct {
 }
 
 // NewSlogLogger creates a new SlogLogger with JSON output.
-func NewSlogLogger(verbose bool, trace bool) *SlogLogger {
-	level := slog.LevelInfo
+// Logs to both stdout and file. File output is always at DEBUG level.
+func NewSlogLogger(verbose bool, logFilePath string) *SlogLogger {
+	stdoutLevel := slog.LevelInfo
 	if verbose {
-		level = slog.LevelDebug
-	}
-	if trace {
-		level = LevelTrace
+		stdoutLevel = slog.LevelDebug
 	}
 
-	handler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-		Level: level,
+	// Create stdout handler
+	stdoutHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: stdoutLevel,
 	})
 
+	// If log file path is provided, create file handler and multi-handler
+	if logFilePath != "" {
+		logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+		if err != nil {
+			// If file creation fails, fall back to stdout only
+			return &SlogLogger{
+				logger: slog.New(stdoutHandler),
+			}
+		}
+
+		// File handler always logs at DEBUG level
+		fileHandler := slog.NewJSONHandler(logFile, &slog.HandlerOptions{
+			Level: slog.LevelDebug,
+		})
+
+		// Use multi-handler to write to both stdout and file
+		multiHandler := &multiHandler{
+			handlers: []slog.Handler{stdoutHandler, fileHandler},
+		}
+
+		return &SlogLogger{
+			logger: slog.New(multiHandler),
+		}
+	}
+
 	return &SlogLogger{
-		logger: slog.New(handler),
+		logger: slog.New(stdoutHandler),
 	}
 }
 
@@ -57,11 +77,6 @@ func (l *SlogLogger) Debug(msg string, args ...any) {
 	l.logger.Debug(msg, args...)
 }
 
-// Trace outputs a trace log.
-func (l *SlogLogger) Trace(msg string, args ...any) {
-	l.logger.Log(context.Background(), LevelTrace, msg, args...)
-}
-
 // NullLogger is a logger that outputs nothing (for testing).
 type NullLogger struct{}
 
@@ -78,9 +93,6 @@ func (l *NullLogger) Error(msg string, args ...any) {}
 
 // Debug does nothing.
 func (l *NullLogger) Debug(msg string, args ...any) {}
-
-// Trace does nothing.
-func (l *NullLogger) Trace(msg string, args ...any) {}
 
 // mockLogger is a mock logger for testing.
 type mockLogger struct {
@@ -128,11 +140,6 @@ func (m *mockLogger) Error(msg string, args ...any) {
 // Debug records a debug log.
 func (m *mockLogger) Debug(msg string, args ...any) {
 	m.logger.Debug(msg, args...)
-}
-
-// Trace records a trace log.
-func (m *mockLogger) Trace(msg string, args ...any) {
-	m.logger.Log(context.Background(), LevelTrace, msg, args...)
 }
 
 // mockLogHandler is a custom slog handler for testing.
@@ -189,3 +196,48 @@ func (h *mockLogHandler) WithGroup(name string) slog.Handler {
 
 var _ io.Writer = (*mockLogBuffer)(nil)
 var _ slog.Handler = (*mockLogHandler)(nil)
+
+// multiHandler is a slog.Handler that writes to multiple handlers.
+type multiHandler struct {
+	handlers []slog.Handler
+}
+
+func (h *multiHandler) Enabled(ctx context.Context, level slog.Level) bool {
+	// Enable if any handler is enabled for this level
+	for _, handler := range h.handlers {
+		if handler.Enabled(ctx, level) {
+			return true
+		}
+	}
+	return false
+}
+
+func (h *multiHandler) Handle(ctx context.Context, r slog.Record) error {
+	// Write to all handlers
+	for _, handler := range h.handlers {
+		if handler.Enabled(ctx, r.Level) {
+			if err := handler.Handle(ctx, r.Clone()); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (h *multiHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	newHandlers := make([]slog.Handler, len(h.handlers))
+	for i, handler := range h.handlers {
+		newHandlers[i] = handler.WithAttrs(attrs)
+	}
+	return &multiHandler{handlers: newHandlers}
+}
+
+func (h *multiHandler) WithGroup(name string) slog.Handler {
+	newHandlers := make([]slog.Handler, len(h.handlers))
+	for i, handler := range h.handlers {
+		newHandlers[i] = handler.WithGroup(name)
+	}
+	return &multiHandler{handlers: newHandlers}
+}
+
+var _ slog.Handler = (*multiHandler)(nil)

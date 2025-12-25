@@ -22,7 +22,6 @@ type Options struct {
 	ImageSize    string
 	Output       string
 	Verbose      bool
-	Trace        bool
 	NoOpen       bool
 }
 
@@ -35,7 +34,6 @@ func NewRootCommand() *cobra.Command {
 		file         string
 		output       string
 		verbose      bool
-		trace        bool
 		researchOnly bool
 		imageOnly    bool
 		model        string
@@ -80,7 +78,6 @@ func NewRootCommand() *cobra.Command {
 				File:         file,
 				Output:       config.OutputDir,
 				Verbose:      verbose,
-				Trace:        trace,
 				ResearchOnly: researchOnly,
 				ImageOnly:    imageOnly,
 				Model:        config.Model,
@@ -98,8 +95,7 @@ func NewRootCommand() *cobra.Command {
 	rootCmd.Flags().StringVarP(&prompt, "prompt", "p", "", "Generation prompt")
 	rootCmd.Flags().StringVarP(&file, "file", "f", "", "Prompt file path")
 	rootCmd.Flags().StringVarP(&output, "output", "o", "", "Output directory")
-	rootCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose logging")
-	rootCmd.Flags().BoolVar(&trace, "trace", false, "Enable trace logging (includes HTTP request/response bodies)")
+	rootCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose logging (DEBUG level)")
 	rootCmd.Flags().BoolVar(&researchOnly, "research-only", false, "Execute research only")
 	rootCmd.Flags().BoolVar(&imageOnly, "image-only", false, "Execute image generation only")
 	rootCmd.Flags().StringVar(&model, "model", "gemini-3-pro-image-preview", "Image generation model name")
@@ -302,8 +298,15 @@ func RunWithConfig(opts *Options, config *ViperConfig) error {
 	// Create context
 	ctx := context.Background()
 
+	// Ensure log directory exists and create log file path
+	logDir := config.LogDir()
+	if err := EnsureDir(logDir); err != nil {
+		return fmt.Errorf("failed to create log directory: %w", err)
+	}
+	logFilePath := filepath.Join(logDir, "deepviz.log")
+
 	// Create logger
-	logger := NewSlogLogger(opts.Verbose, opts.Trace)
+	logger := NewSlogLogger(opts.Verbose, logFilePath)
 
 	// Ensure output directories exist
 	if err := config.EnsureDirectories(); err != nil {
