@@ -1,6 +1,4 @@
 .mise.toml
 .claude
-/bin/*
-/build/*
-/dist/*
-!.gitkeep
+.zig-cache/
+zig-out/
