@@ -35,13 +35,13 @@ pub const Logger = struct {
     }
 
     fn write(self: Logger, prefix: []const u8, comptime fmt: []const u8, args: anytype) void {
-        const stderr = std.io.getStdErr().writer();
+        const stderr = std.fs.File.stderr().deprecatedWriter();
         stderr.writeAll(prefix) catch {};
         stderr.print(fmt, args) catch {};
         stderr.writeAll("\n") catch {};
 
         if (self.file) |f| {
-            const w = f.writer();
+            const w = f.deprecatedWriter();
             w.writeAll(prefix) catch {};
             w.print(fmt, args) catch {};
             w.writeAll("\n") catch {};

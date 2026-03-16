@@ -16,7 +16,7 @@ pub const HttpClient = struct {
 
     pub fn init(allocator: std.mem.Allocator) HttpClient {
         return .{
-            .inner = std.http.Client{ .allocator = allocator },
+            .inner = .{ .allocator = allocator },
             .allocator = allocator,
         };
     }
@@ -29,39 +29,42 @@ pub const HttpClient = struct {
     pub fn post(self: *HttpClient, url_str: []const u8, headers: []const Header, body: []const u8) !Response {
         const uri = try std.Uri.parse(url_str);
 
-        var extra_headers = std.http.Client.Request.Headers{};
+        var req_headers = std.http.Client.Request.Headers{};
+        var extra_buf: [16]std.http.Header = undefined;
+        var extra_count: usize = 0;
+
         for (headers) |h| {
             if (std.mem.eql(u8, h.name, "Content-Type")) {
-                extra_headers.content_type = .{ .override = h.value };
+                req_headers.content_type = .{ .override = h.value };
+            } else {
+                extra_buf[extra_count] = .{ .name = h.name, .value = h.value };
+                extra_count += 1;
             }
         }
 
-        var req = try self.inner.open(.POST, uri, .{
-            .server_header_buffer = try self.allocator.alloc(u8, 16 * 1024),
-            .extra_headers = blk: {
-                var list = std.ArrayList(std.http.Header).init(self.allocator);
-                for (headers) |h| {
-                    if (!std.mem.eql(u8, h.name, "Content-Type")) {
-                        try list.append(.{ .name = h.name, .value = h.value });
-                    }
-                }
-                break :blk try list.toOwnedSlice();
-            },
+        var req = try self.inner.request(.POST, uri, .{
+            .headers = req_headers,
+            .extra_headers = extra_buf[0..extra_count],
         });
         defer req.deinit();
 
         req.transfer_encoding = .{ .content_length = body.len };
-        try req.send();
-        try req.writer().writeAll(body);
-        try req.finish();
-        try req.wait();
+        var send_buf: [4096]u8 = undefined;
+        var body_writer = try req.sendBodyUnflushed(&send_buf);
+        try body_writer.writer.writeAll(body);
+        try body_writer.end();
+        try req.connection.?.flush();
 
-        // Read response body
-        const max_size = 32 * 1024 * 1024; // 32MB max for image responses
-        const resp_body = try req.reader().readAllAlloc(self.allocator, max_size);
+        var recv_buf: [8192]u8 = undefined;
+        var response = try req.receiveHead(&recv_buf);
+
+        var transfer_buf: [4096]u8 = undefined;
+        var reader = response.reader(&transfer_buf);
+        const max_size: std.Io.Limit = .limited(32 * 1024 * 1024);
+        const resp_body = try reader.allocRemaining(self.allocator, max_size);
 
         return Response{
-            .status = req.response.status,
+            .status = response.head.status,
             .body = resp_body,
         };
     }

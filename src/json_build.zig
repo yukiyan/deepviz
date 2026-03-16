@@ -2,40 +2,40 @@ const std = @import("std");
 
 /// Escape a string for JSON (RFC 8259).
 pub fn jsonEscape(allocator: std.mem.Allocator, input: []const u8) ![]const u8 {
-    var list = std.ArrayList(u8).init(allocator);
-    errdefer list.deinit();
-    try list.ensureTotalCapacity(input.len + input.len / 8);
+    var list: std.ArrayList(u8) = .empty;
+    errdefer list.deinit(allocator);
+    try list.ensureTotalCapacity(allocator, input.len + input.len / 8);
 
     for (input) |c| {
         switch (c) {
-            '"' => try list.appendSlice("\\\""),
-            '\\' => try list.appendSlice("\\\\"),
-            '\n' => try list.appendSlice("\\n"),
-            '\r' => try list.appendSlice("\\r"),
-            '\t' => try list.appendSlice("\\t"),
-            0x08 => try list.appendSlice("\\b"),
-            0x0C => try list.appendSlice("\\f"),
+            '"' => try list.appendSlice(allocator, "\\\""),
+            '\\' => try list.appendSlice(allocator, "\\\\"),
+            '\n' => try list.appendSlice(allocator, "\\n"),
+            '\r' => try list.appendSlice(allocator, "\\r"),
+            '\t' => try list.appendSlice(allocator, "\\t"),
+            0x08 => try list.appendSlice(allocator, "\\b"),
+            0x0C => try list.appendSlice(allocator, "\\f"),
             else => {
                 if (c < 0x20) {
                     // Control character: \u00XX
                     var buf: [6]u8 = undefined;
                     _ = std.fmt.bufPrint(&buf, "\\u{X:0>4}", .{c}) catch unreachable;
-                    try list.appendSlice(&buf);
+                    try list.appendSlice(allocator, &buf);
                 } else {
-                    try list.append(c);
+                    try list.append(allocator, c);
                 }
             },
         }
     }
 
-    return try list.toOwnedSlice();
+    return try list.toOwnedSlice(allocator);
 }
 
 /// Sanitize prompt: remove control characters but keep printable + whitespace.
 pub fn sanitizePrompt(allocator: std.mem.Allocator, input: []const u8) ![]const u8 {
-    var list = std.ArrayList(u8).init(allocator);
-    errdefer list.deinit();
-    try list.ensureTotalCapacity(input.len);
+    var list: std.ArrayList(u8) = .empty;
+    errdefer list.deinit(allocator);
+    try list.ensureTotalCapacity(allocator, input.len);
 
     var i: usize = 0;
     while (i < input.len) {
@@ -43,7 +43,7 @@ pub fn sanitizePrompt(allocator: std.mem.Allocator, input: []const u8) ![]const 
         if (byte < 0x80) {
             // ASCII
             if (byte >= 0x20 or byte == '\t' or byte == '\n' or byte == '\r') {
-                try list.append(byte);
+                try list.append(allocator, byte);
             }
             // else: skip control char
             i += 1;
@@ -54,12 +54,12 @@ pub fn sanitizePrompt(allocator: std.mem.Allocator, input: []const u8) ![]const 
                 continue;
             };
             if (i + len > input.len) break;
-            try list.appendSlice(input[i .. i + len]);
+            try list.appendSlice(allocator, input[i .. i + len]);
             i += len;
         }
     }
 
-    return try list.toOwnedSlice();
+    return try list.toOwnedSlice(allocator);
 }
 
 /// Build the Gemini generateContent JSON request body.

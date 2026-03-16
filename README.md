@@ -21,7 +21,7 @@ Nanobanana 画像生成 CLI ツール。Zig で書かれた高速・軽量なシ
 zig build -Doptimize=ReleaseSmall
 
 # 画像生成
-export GEMINI_API_KEY="your-api-key"
+export NANOGEN_API_KEY="your-api-key"
 ./zig-out/bin/nanogen -p "夕焼けの富士山"
 ```
 
@@ -82,8 +82,8 @@ nanogen -p "hello" -v
 
 | 変数名 | 説明 |
 |--------|------|
-| `GEMINI_API_KEY` / `NANOGEN_API_KEY` | API キー（必須） |
-| `NANOGEN_MODEL` / `GEMINI_MODEL` | モデル名 |
+| `NANOGEN_API_KEY` | API キー（必須） |
+| `NANOGEN_MODEL` | モデル名 |
 | `NANOGEN_ASPECT_RATIO` | アスペクト比 |
 | `NANOGEN_IMAGE_SIZE` | 画像サイズ |
 | `NANOGEN_OUTPUT_DIR` | 出力ディレクトリ |

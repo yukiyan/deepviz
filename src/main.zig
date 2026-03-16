@@ -12,7 +12,7 @@ const version = "0.1.0";
 
 pub fn main() !void {
     run() catch |e| {
-        const stderr = std.io.getStdErr().writer();
+        const stderr = std.fs.File.stderr().deprecatedWriter();
         stderr.print("error: {s}\n", .{@errorName(e)}) catch {};
         std.process.exit(1);
     };
@@ -27,20 +27,20 @@ fn run() !void {
     // Parse CLI args (skip argv[0] = program name)
     const argv = try std.process.argsAlloc(allocator);
     const args = cli.parse(argv[1..]) catch {
-        try cli.printUsage(std.io.getStdErr().writer());
+        try cli.printUsage(std.fs.File.stderr().deprecatedWriter());
         std.process.exit(1);
         unreachable;
     };
 
     // Handle --help
     if (args.help) {
-        try cli.printUsage(std.io.getStdOut().writer());
+        try cli.printUsage(std.fs.File.stdout().deprecatedWriter());
         return;
     }
 
     // Handle --version
     if (args.version) {
-        const stdout = std.io.getStdOut().writer();
+        const stdout = std.fs.File.stdout().deprecatedWriter();
         try stdout.print("nanogen {s}\n", .{version});
         return;
     }
@@ -60,7 +60,7 @@ fn run() !void {
 
     // Validate: need either --prompt or --file
     if (args.prompt == null and args.file == null) {
-        const stderr = std.io.getStdErr().writer();
+        const stderr = std.fs.File.stderr().deprecatedWriter();
         try stderr.writeAll("error: either --prompt or --file must be specified\n\n");
         try cli.printUsage(stderr);
         std.process.exit(1);
@@ -68,8 +68,8 @@ fn run() !void {
 
     // Validate API key
     if (cfg.api_key.len == 0) {
-        const stderr = std.io.getStdErr().writer();
-        try stderr.writeAll("error: API key not set. Set GEMINI_API_KEY or NANOGEN_API_KEY environment variable\n");
+        const stderr = std.fs.File.stderr().deprecatedWriter();
+        try stderr.writeAll("error: API key not set. Set NANOGEN_API_KEY environment variable\n");
         std.process.exit(1);
     }
 
@@ -78,7 +78,7 @@ fn run() !void {
     if (args.file) |file_path| {
         prompt = try fs.readFileAlloc(allocator, file_path);
         if (prompt.len == 0) {
-            const stderr = std.io.getStdErr().writer();
+            const stderr = std.fs.File.stderr().deprecatedWriter();
             try stderr.print("error: prompt file is empty: {s}\n", .{file_path});
             std.process.exit(1);
         }
@@ -126,7 +126,7 @@ fn run() !void {
     }
 
     // Print summary
-    const stdout = std.io.getStdOut().writer();
+    const stdout = std.fs.File.stdout().deprecatedWriter();
     try stdout.print("\n=== Generation Complete ===\n", .{});
     try stdout.print("Image: {s}\n", .{image_path});
     try stdout.print("Output: {s}\n", .{cfg.output_dir});

@@ -30,8 +30,8 @@ pub fn load(allocator: std.mem.Allocator, args: cli.Args) !Config {
     loadConfigFile(allocator, &cfg) catch {};
 
     // Environment variables
-    if (env("NANOGEN_API_KEY") orelse env("GEMINI_API_KEY")) |v| cfg.api_key = v;
-    if (env("NANOGEN_MODEL") orelse env("GEMINI_MODEL")) |v| cfg.model = v;
+    if (env("NANOGEN_API_KEY")) |v| cfg.api_key = v;
+    if (env("NANOGEN_MODEL")) |v| cfg.model = v;
     if (env("NANOGEN_ASPECT_RATIO")) |v| cfg.aspect_ratio = v;
     if (env("NANOGEN_IMAGE_SIZE")) |v| cfg.image_size = v;
     if (env("NANOGEN_OUTPUT_DIR")) |v| cfg.output_dir = v;
